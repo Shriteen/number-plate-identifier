@@ -60,11 +60,11 @@ button_frame.pack(pady=20)
 
 
 # Create a button for image upload
-upload_button = ttk.Button(button_frame, text="Upload Image", command=upload_image)
+upload_button = ttk.Button(button_frame, text="Select Image", command=upload_image)
 upload_button.pack(side="left", padx=10)
 
 # Create a button to display dummy text (initially hidden)
-show_text_button = ttk.Button(button_frame, text="Show Text", command=display_text)
+show_text_button = ttk.Button(button_frame, text="Identify", command=display_text)
 show_text_button.pack(side="left", padx=10)
 show_text_button.pack_forget()
 
