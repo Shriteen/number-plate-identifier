@@ -175,22 +175,3 @@ def checkForRect(rect):
     else:
         return True
 
-    
-
-if __name__ == "__main__":
-    # for i in range(1,9):
-    #     plateNumbers= identify('test_images/test'+str(i)+'.jpg')
-        plateNumbers=identify('test_images/test1.png')
-    # for i in range(1,16):
-    #     plateNumbers= identify('test_images/test'+str(i)+'.png')
-        if len(plateNumbers)==0 :
-            print("Could not detect number")
-        elif len(plateNumbers)==1:
-            print("Number plate detected: ", plateNumbers.pop())
-        else:
-            print("Ambiguity among following numbers:",end=" ")
-            for num in plateNumbers:
-                print(num,end=" ")
-            print()
-                 
-    
