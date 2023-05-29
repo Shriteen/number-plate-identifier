@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from PIL import ImageTk, Image
+from numberplate_identifier import identify
 
 def upload_image():
     global file_path
@@ -23,10 +24,20 @@ def upload_image():
         # Show the "Show Text" button
         show_text_button.pack()
 
-def display_dummy_text():
-    dummy_text = input("Enter text.")
-    text_label.configure(text=dummy_text)
-
+def display_text():
+    global file_path
+    if file_path:
+        numberplate=str(identify(file_path))
+        # set value and ;show text label
+        text_label.configure(text=numberplate)
+        text_label.pack()
+        # reset file path and hide show text button so that its shown only if another image selected
+        file_path=None
+        show_text_button.pack_forget()
+        
+# global variable for access across 
+file_path=None
+        
 # Create the main window
 window = tk.Tk()
 window.title("Automatic Number Plate Detection")
@@ -41,7 +52,7 @@ upload_button = tk.Button(button_frame, text="Upload Image", command=upload_imag
 upload_button.pack(side="left", padx=10)
 
 # Create a button to display dummy text (initially hidden)
-show_text_button = tk.Button(button_frame, text="Show Text", command=display_dummy_text)
+show_text_button = tk.Button(button_frame, text="Show Text", command=display_text)
 show_text_button.pack(side="left", padx=10)
 show_text_button.pack_forget()
 
