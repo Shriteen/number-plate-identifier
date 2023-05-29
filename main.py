@@ -3,7 +3,13 @@ from tkinter import filedialog
 from PIL import ImageTk, Image
 
 def upload_image():
-    file_path = filedialog.askopenfilename()
+    global file_path
+    file_path = filedialog.askopenfilename(filetypes=[
+        ("image", ".jpeg"), ("image", ".png"), ("image", ".jpg"),
+        ("image", ".jp2"), ("image", ".bmp"), ("image", ".webp"),
+        ("image", ".tiff")
+    ])
+    
     if file_path:
         # Display the uploaded image
         uploaded_image = Image.open(file_path)
@@ -12,6 +18,8 @@ def upload_image():
         image_label.image = ImageTk.PhotoImage(uploaded_image)
         image_label.configure(image=image_label.image)
 
+        #hide text label
+        text_label.pack_forget()
         # Show the "Show Text" button
         show_text_button.pack()
 
