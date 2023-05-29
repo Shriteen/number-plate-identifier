@@ -27,9 +27,17 @@ def upload_image():
 def display_text():
     global file_path
     if file_path:
-        numberplate=str(identify(file_path))
+        numberplateSet=identify(file_path)
+        
+        if len(numberplateSet)==0 :
+            textToShow="Could not detect number"
+        elif len(numberplateSet)==1:
+            textToShow="Number plate detected: " + str(numberplateSet.pop())
+        else:
+            textToShow="Ambiguity among following numbers: " + ",".join(numberplateSet)
+        
         # set value and ;show text label
-        text_label.configure(text=numberplate)
+        text_label.configure(text= textToShow )
         text_label.pack()
         # reset file path and hide show text button so that its shown only if another image selected
         file_path=None
