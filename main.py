@@ -12,73 +12,20 @@ stateCodes=['AN', 'AP', 'AR', 'AS', 'BR', 'CH', 'DN',
 
 def identify(imgPath):
     '''Accepts an image path and returns set of possible registration numbers '''
+
     #Load the image
     img = cv2.imread(imgPath)
     # cv2.imshow("Image",img)
     # cv2.waitKey(0)
-
     
-    #blur image to remove noise
-    img2= cv2.GaussianBlur(img,(3,3),0)
-    #cv2.imshow("Image",img2)
-    #cv2.waitKey(0)
-
-    #convert to greyscale
-    img2= cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
-    img2= cv2.GaussianBlur(img2,(7,7),0)
-    # cv2.imshow("Image",img2)
-    # cv2.waitKey(0)
-    
-    #determine edges
-    imgX= cv2.Sobel(img2,-1,1,0,ksize=-1)
-    imgY= cv2.Sobel(img2,-1,0,1,ksize=-1)
-    edgeMap= cv2.addWeighted(imgX,1,imgY,0,0)
-    # cv2.imshow("Image",edgeMap)
-    # cv2.waitKey(0) 
-    
-    #threshold to convert to b/w
-    _,edgeMap= cv2.threshold(edgeMap, 0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    # cv2.imshow("Image",edgeMap)
-    # cv2.waitKey(0) 
-
-    #perform closing operation
-    edgeMap= cv2.morphologyEx(edgeMap,
-                              cv2.MORPH_CLOSE,
-                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(30,18)))
-
-    # cv2.imshow("Image",edgeMap)
-    # cv2.waitKey(0) 
-
-    #perform opening operation to separate out individual objects 
-    edgeMap= cv2.morphologyEx(edgeMap,
-                              cv2.MORPH_OPEN,
-                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(16,16)))
-    # cv2.imshow("Image",edgeMap)
-    # cv2.waitKey(0) 
-
-    #perform dilation to smoothen out some rough edges
-    edgeMap= cv2.morphologyEx(edgeMap,
-                              cv2.MORPH_DILATE,
-                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(24,24)))
-    # cv2.imshow("Image",edgeMap)
-    # cv2.waitKey(0) 
-
-    #perform erosion to crop it to content on plate
-    edgeMap= cv2.morphologyEx(edgeMap,
-                              cv2.MORPH_ERODE,
-                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(5,10)))
-    # cv2.imshow("Image",edgeMap)
-    # cv2.waitKey(0) 
-
+    processed=preprocessAndGetSegmentMasks(img)
     
     #find contours
-    contours,hiearchy= cv2.findContours(edgeMap,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours,hiearchy= cv2.findContours(processed,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     #mark the contours for visualisation
     cv2.drawContours(img, contours, -1, (0,255,0), 1)
-
-    #cv2.imshow("Image",img2)    
-    #cv2.waitKey(0)
-
+    # cv2.imshow("Image",processed)    
+    # cv2.waitKey(0)
 
     #initialise empty set of detections
     detections=set()
@@ -145,6 +92,63 @@ def identify(imgPath):
     return detections
 
 
+def preprocessAndGetSegmentMasks(img):
+
+    #blur image to remove noise
+    img2= cv2.GaussianBlur(img,(3,3),0)
+    # cv2.imshow("Image",img2)
+    # cv2.waitKey(0)
+
+    #convert to greyscale
+    img2= cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
+    img2= cv2.GaussianBlur(img2,(7,7),0)
+    # cv2.imshow("Image",img2)
+    # cv2.waitKey(0)
+    
+    #determine edges
+    imgX= cv2.Sobel(img2,-1,1,0,ksize=-1)
+    imgY= cv2.Sobel(img2,-1,0,1,ksize=-1)
+    edgeMap= cv2.addWeighted(imgX,1,imgY,0,0)
+    # cv2.imshow("Image",edgeMap)
+    # cv2.waitKey(0) 
+    
+    #threshold to convert to b/w
+    _,edgeMap= cv2.threshold(edgeMap, 0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    # cv2.imshow("Image",edgeMap)
+    # cv2.waitKey(0) 
+
+    #perform closing operation
+    edgeMap= cv2.morphologyEx(edgeMap,
+                              cv2.MORPH_CLOSE,
+                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(30,18)))
+
+    # cv2.imshow("Image",edgeMap)
+    # cv2.waitKey(0) 
+
+    #perform opening operation to separate out individual objects 
+    edgeMap= cv2.morphologyEx(edgeMap,
+                              cv2.MORPH_OPEN,
+                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(16,16)))
+    # cv2.imshow("Image",edgeMap)
+    # cv2.waitKey(0) 
+
+    #perform dilation to smoothen out some rough edges
+    edgeMap= cv2.morphologyEx(edgeMap,
+                              cv2.MORPH_DILATE,
+                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(24,24)))
+    # cv2.imshow("Image",edgeMap)
+    # cv2.waitKey(0) 
+
+    #perform erosion to crop it to content on plate
+    edgeMap= cv2.morphologyEx(edgeMap,
+                              cv2.MORPH_ERODE,
+                              cv2.getStructuringElement(cv2.MORPH_RECT, ksize=(5,10)))
+    # cv2.imshow("Image",edgeMap)
+    # cv2.waitKey(0)
+
+    return edgeMap
+
+
 def isMostlyWhite(img):
     '''Accepts an image and returns True if image is bright, False otherwise '''
     avg= np.mean(img)
@@ -154,7 +158,6 @@ def isMostlyWhite(img):
         return False
 
 
-    
 def checkForRect(rect):
     '''Accepts a RotatedRectangle from cv2 and
     determine if the width:height ratio is good enough
@@ -175,9 +178,9 @@ def checkForRect(rect):
     
 
 if __name__ == "__main__":
-    for i in range(1,9):
-        plateNumbers= identify('test_images/test'+str(i)+'.jpg')
-    #identify('test_images/test1.png')
+    # for i in range(1,9):
+    #     plateNumbers= identify('test_images/test'+str(i)+'.jpg')
+        plateNumbers=identify('test_images/test1.png')
     # for i in range(1,16):
     #     plateNumbers= identify('test_images/test'+str(i)+'.png')
         if len(plateNumbers)==0 :
