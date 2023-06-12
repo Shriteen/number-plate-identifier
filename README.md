@@ -6,5 +6,5 @@ Identify vehicle registration number from images
 `pip install opencv-python`
 `pip install pytesseract`
 
-# References
+## References
 <https://techvidvan.com/tutorials/python-project-license-number-plate-recognition/>
